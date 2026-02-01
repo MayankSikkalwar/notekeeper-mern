@@ -46,3 +46,14 @@ export const deleteNote=async(req,res)=>{
          res.status(500).json({message:error.message})
     }
 }
+
+export const togglePinNote = async (req, res) => {
+  try {
+    const note = await Note.findById(req.params.id)
+    note.isPinned = !note.isPinned
+    await note.save()
+    res.status(200).json(note)
+  } catch (error) {
+    res.status(500).json({ message: "Failed to pin note" })
+  }
+}

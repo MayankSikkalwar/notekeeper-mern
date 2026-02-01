@@ -1,20 +1,21 @@
 import React, { useContext, useState } from 'react'
 import { NoteContext } from '../context/NoteContext'
 
-function Notecard({note}) {
-    const {deleteNote,updateNote}=useContext(NoteContext)
-    const [isEditing,setIsEditing]=useState(false)
-    const [editData,setEditData]=useState({
-        title:note.title,
-        content:note.content
-    })
+function Notecard({ note }) {
+  const { deleteNote, updateNote, pinNote } = useContext(NoteContext)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editData, setEditData] = useState({
+    title: note.title,
+    content: note.content
+  })
 
-    const handleUpdate=()=>{
-        updateNote(note._id,editData)
-        setIsEditing(false)
-    }
+  const handleUpdate = () => {
+    updateNote(note._id, editData)
+    setIsEditing(false)
+  }
+
   return (
-     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-md hover:shadow-lg transition-all p-5 flex flex-col">
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-md hover:shadow-lg transition-all p-5 flex flex-col">
       {isEditing ? (
         <>
           {/* Edit Mode */}
@@ -63,7 +64,7 @@ function Notecard({note}) {
             {note.content}
           </p>
 
-          {/* Footer: date + actions */}
+          {/* Footer */}
           <div className="mt-4 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
             <span>
               {new Date(note.createdAt).toLocaleDateString("en-GB", {
@@ -74,6 +75,14 @@ function Notecard({note}) {
             </span>
 
             <div className="flex gap-2">
+              {/* 📌 PIN BUTTON */}
+              <button
+                onClick={() => pinNote(note._id)}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg transition"
+              >
+                {note.isPinned ? "Unpin 📌" : "Pin 📌"}
+              </button>
+
               <button
                 onClick={() => setIsEditing(true)}
                 className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-lg transition"
