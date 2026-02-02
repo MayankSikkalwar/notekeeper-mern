@@ -1,46 +1,69 @@
-import React, { useContext, useState } from 'react'
-import { NoteContext } from '../context/NoteContext'
+import React, { useContext, useState } from "react";
+import { NoteContext } from "../context/NoteContext";
+import { useNavigate } from "react-router-dom";
 
 function Noteform() {
-    const {createNote}=useContext(NoteContext)
-    const [note,setNote]=useState({
-        title:"",
-        content:""
-    })
+  const { createNote } = useContext(NoteContext);
+  const navigate = useNavigate();
 
-    const handleSubmit=(e)=>{
-        e.preventDefault()
-        if(!note.title || !note.content)return
-        createNote(note)
-        setNote({title:"",content:""})
-    }
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [tags, setTags] = useState(""); // 🏷️ NEW
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    createNote({
+      title,
+      content,
+      tags: tags
+        .split(" ")
+        .map(tag => tag.trim())
+        .filter(tag => tag !== "")
+    });
+
+    setTitle("");
+    setContent("");
+    setTags("");
+    navigate("/");
+  };
+
   return (
-    <div className="max-w-xl mx-auto mt-10 bg-gray-800 rounded-2xl shadow-lg p-6">
-      <h2 className="text-2xl font-bold text-center text-blue-400 mb-6">Create a New Note</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          placeholder="Enter title..."
-          className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 outline-none"
-          value={note.title}
-          onChange={(e) => setNote({ ...note, title: e.target.value })}
-        />
-        <textarea
-          placeholder="Write your note here..."
-          className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 outline-none"
-          rows="5"
-          value={note.content}
-          onChange={(e) => setNote({ ...note, content: e.target.value })}
-        />
-        <button
-          type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2 rounded-lg shadow-md"
-        >
-          Add Note
-        </button>
-      </form>
-    </div>
-  )
+    <form className="bg-gray-800 p-6 rounded-xl w-full max-w-md shadow-lg" onSubmit={handleSubmit}>
+      <h2 className="text-xl text-white mb-4">Create Note</h2>
+
+      <input
+        type="text"
+        placeholder="Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        className="w-full p-2 mb-3 rounded bg-gray-700 text-white"
+        required
+      />
+
+      <textarea
+        placeholder="Content"
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        className="w-full p-2 mb-3 rounded bg-gray-700 text-white"
+        rows="4"
+        required
+      />
+
+      {/* 🏷️ TAG INPUT */}
+      <input
+        type="text"
+        placeholder="Tags (e.g. dsa react project)"
+        value={tags}
+        onChange={(e) => setTags(e.target.value)}
+        className="w-full p-2 mb-4 rounded bg-gray-700 text-white"
+      />
+
+      <button className="bg-blue-600 w-full py-2 text-white rounded hover:bg-blue-700">
+        Add Note
+      </button>
+    </form>
+  );
 }
 
-export default Noteform
+export default Noteform;

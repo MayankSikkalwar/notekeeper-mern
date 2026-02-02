@@ -1,11 +1,11 @@
 import Note from "../models/note.model.js";
 export const createNote=async(req,res)=>{
     try {
-        const {title,content}=req.body;
+        const {title,content,tags}=req.body;
         if(!title || !content){
             return res.status(400).json({message:"Title and content are required"});
         }
-      const newNote=  new Note({title,content})
+      const newNote=  new Note({title,content,tags: tags || [] })
       await newNote.save();
       res.status(201).json(newNote)
     } catch (error) {
@@ -25,7 +25,7 @@ export const getNotes=async(req,res)=>{
 export const updateNote=async(req,res)=>{
     try {
         const {title,content}=req.body;
-        const updatedNote= await Note.findByIdAndUpdate(req.params.id,{title,content},{new:true})
+        const updatedNote= await Note.findByIdAndUpdate(req.params.id,{title,content, tags},{new:true})
         if(!updatedNote){
             return res.status(404).json({message:"Note not updated"})
         }
