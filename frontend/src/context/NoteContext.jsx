@@ -8,6 +8,24 @@ export const NoteProvider = ({ children }) => {
   const { currentUser } = useAuth(); // ✅ FIX 1
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
+  const [pendingNoteIds, setPendingNoteIds] = useState(new Set());
+
+  const addPendingNote = (id) => {
+    setPendingNoteIds((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+  };
+
+  const removePendingNote = (id) => {
+    setPendingNoteIds((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+  };
 
   // ✅ FETCH NOTES FOR LOGGED-IN USER ONLY
   const getNotes = async () => {
@@ -37,35 +55,67 @@ export const NoteProvider = ({ children }) => {
 
   // ✅ CREATE NOTE WITH USER ID
   const createNote = async (note) => {
-    const res = await BACKEND_URL.post("/create-note", {
-      ...note,
-      userId: currentUser.uid,
-    });
-    setNotes((prev) => [res.data, ...prev]);
+    if (!currentUser) return;
+    setIsCreating(true);
+    try {
+      const res = await BACKEND_URL.post("/create-note", {
+        ...note,
+        userId: currentUser.uid,
+      });
+      setNotes((prev) => [res.data, ...prev]);
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const updateNote = async (id, updatedNote) => {
-    const res = await BACKEND_URL.put(`/update-note/${id}`, updatedNote);
-    setNotes(notes.map((n) => (n._id === id ? res.data : n)));
+    addPendingNote(id);
+    try {
+      const res = await BACKEND_URL.put(`/update-note/${id}`, updatedNote);
+      setNotes((prev) => prev.map((n) => (n._id === id ? res.data : n)));
+    } finally {
+      removePendingNote(id);
+    }
   };
 
   const deleteNote = async (id) => {
-    await BACKEND_URL.delete(`/delete-note/${id}`, {
-      data: { userId: currentUser.uid },
-    });
-    setNotes(notes.filter((n) => n._id !== id));
+    if (!currentUser) return;
+    addPendingNote(id);
+    try {
+      await BACKEND_URL.delete(`/delete-note/${id}`, {
+        data: { userId: currentUser.uid },
+      });
+      setNotes((prev) => prev.filter((n) => n._id !== id));
+    } finally {
+      removePendingNote(id);
+    }
   };
 
   const pinNote = async (id) => {
-    const res = await BACKEND_URL.patch(`/pin-note/${id}`, {
-      userId: currentUser.uid,
-    });
-    setNotes(notes.map((n) => (n._id === id ? res.data : n)));
+    if (!currentUser) return;
+    addPendingNote(id);
+    try {
+      const res = await BACKEND_URL.patch(`/pin-note/${id}`, {
+        userId: currentUser.uid,
+      });
+      setNotes((prev) => prev.map((n) => (n._id === id ? res.data : n)));
+    } finally {
+      removePendingNote(id);
+    }
   };
 
   return (
     <NoteContext.Provider
-      value={{ notes, loading, createNote, updateNote, deleteNote, pinNote }}
+      value={{
+        notes,
+        loading,
+        isCreating,
+        pendingNoteIds,
+        createNote,
+        updateNote,
+        deleteNote,
+        pinNote,
+      }}
     >
       {children}
     </NoteContext.Provider>

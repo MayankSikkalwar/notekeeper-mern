@@ -1,9 +1,8 @@
-import { Link, useLocation } from "react-router-dom";
-import { BookOpen } from "lucide-react";
+import { Link, NavLink } from "react-router-dom";
+import { BookOpen, LogOut } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 
 function Navbar() {
-  const location = useLocation();
   const { currentUser, logout } = useAuth();
 
   const handleLogout = async () => {
@@ -14,62 +13,86 @@ function Navbar() {
     }
   };
 
+  const getInitials = () => {
+    const base = currentUser?.displayName || currentUser?.email || "";
+    if (!base) return "NK";
+    return base
+      .split(" ")
+      .filter(Boolean)
+      .map((part) => part[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
+  };
+
+  const navLinkStyles = ({ isActive }) =>
+    [
+      "rounded-lg px-3 py-1.5 text-sm transition",
+      isActive
+        ? "bg-white/10 text-white shadow-sm"
+        : "text-slate-300 hover:bg-white/5 hover:text-white",
+    ].join(" ");
+
   return (
-    <nav className="bg-gray-900 text-white px-6 py-3 shadow-lg sticky top-0 z-50">
-      <div className="container mx-auto flex justify-between items-center">
+    <nav className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/70 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:px-6">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <BookOpen className="w-7 h-7 text-blue-400" />
-          <span className=" text-2xl text-blue-400 tracking-wide">
-            NoteKeeper
-          </span>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/15 text-sky-300">
+            <BookOpen className="h-5 w-5" />
+          </div>
+          <div className="leading-tight">
+            <p className="font-display text-lg tracking-wide text-slate-100">
+              NoteKeeper
+            </p>
+            <p className="text-xs text-slate-400">Keep ideas flowing</p>
+          </div>
         </Link>
 
         {/* Links */}
-        <div className="flex items-center gap-6">
-          <Link
-            to="/"
-            className={`hover:text-blue-400 transition ${
-              location.pathname === "/" ? "text-blue-400 font-semibold" : "text-gray-300"
-            }`}
-          >
+        <div className="flex items-center gap-3">
+          <NavLink to="/" className={navLinkStyles}>
             Home
-          </Link>
-          <Link
-            to="/create"
-            className={`hover:text-blue-400 transition ${
-              location.pathname === "/create" ? "text-blue-400 font-semibold" : "text-gray-300"
-            }`}
-          >
+          </NavLink>
+          <NavLink to="/create" className={navLinkStyles}>
             Create Note
-          </Link>
+          </NavLink>
           {!currentUser ? (
             <>
-              <Link
-                to="/login"
-                className={`hover:text-blue-400 transition ${
-                  location.pathname === "/login" ? "text-blue-400 font-semibold" : "text-gray-300"
-                }`}
-              >
+              <NavLink to="/login" className={navLinkStyles}>
                 Login
-              </Link>
-              <Link
-                to="/signup"
-                className={`hover:text-blue-400 transition ${
-                  location.pathname === "/signup" ? "text-blue-400 font-semibold" : "text-gray-300"
-                }`}
-              >
+              </NavLink>
+              <NavLink to="/signup" className={navLinkStyles}>
                 Signup
-              </Link>
+              </NavLink>
             </>
           ) : (
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="rounded-md border border-blue-400/60 px-3 py-1 text-sm text-blue-200 transition hover:border-blue-400 hover:text-blue-100"
-            >
-              Logout
-            </button>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-2 py-1.5">
+                {currentUser?.photoURL ? (
+                  <img
+                    src={currentUser.photoURL}
+                    alt="User avatar"
+                    className="h-8 w-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-700 text-xs font-semibold text-slate-100">
+                    {getInitials()}
+                  </div>
+                )}
+                <span className="hidden text-xs text-slate-300 sm:inline">
+                  {currentUser?.displayName || currentUser?.email}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center gap-2 rounded-full bg-sky-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </button>
+            </div>
           )}
         </div>
       </div>

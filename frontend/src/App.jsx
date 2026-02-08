@@ -12,13 +12,14 @@ import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
   return (
-    <div className='flex flex-col min-h-screen bg-gray-900 text-white'>
+    <div className="flex min-h-screen flex-col bg-slate-950 text-slate-100">
       
       {/* Navbar */}
       <Navbar />
 
       {/* Main Content */}
-      <main className='flex-1 container mx-auto p-4'>
+      <main className="flex-1 px-4 py-6 md:px-6">
+        <div className="mx-auto w-full max-w-6xl">
         <Routes>
 
           {/* 🔐 Protected Routes */}
@@ -45,6 +46,7 @@ function App() {
           <Route path="/signup" element={<Signup />} />
 
         </Routes>
+        </div>
       </main>
 
       {/* Footer */}

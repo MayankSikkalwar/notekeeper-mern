@@ -1,4 +1,5 @@
 # Logs
+frontend/src/firebase.js
 .env
 logs
 *.log

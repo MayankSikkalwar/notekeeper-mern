@@ -33,18 +33,24 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
-      <div className="bg-gray-800 p-6 rounded-xl w-full max-w-md">
-        <h2 className="text-2xl font-semibold text-white mb-4">Login</h2>
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4">
+      <div className="glass-card w-full max-w-md rounded-2xl p-8">
+        <p className="text-xs uppercase tracking-[0.3em] text-slate-500">
+          Welcome back
+        </p>
+        <h2 className="font-display text-2xl text-white mb-2">Login</h2>
+        <p className="text-sm text-slate-400 mb-6">
+          Pick up right where you left off.
+        </p>
 
         {error && <p className="text-red-400 mb-3">{error}</p>}
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"
             placeholder="Email"
             required
-            className="w-full p-2 rounded bg-gray-700 text-white outline-none"
+            className="input-field"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -53,26 +59,26 @@ function Login() {
             type="password"
             placeholder="Password"
             required
-            className="w-full p-2 rounded bg-gray-700 text-white outline-none"
+            className="input-field"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded">
+          <button className="w-full rounded-full bg-sky-500 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-400">
             Login
           </button>
         </form>
 
         <button
           onClick={handleGoogleLogin}
-          className="w-full mt-3 bg-red-500 hover:bg-red-600 text-white py-2 rounded"
+          className="w-full mt-4 rounded-full border border-white/10 bg-white/5 py-2 text-sm text-slate-100 transition hover:bg-white/10"
         >
           Continue with Google
         </button>
 
-        <p className="text-gray-400 text-sm mt-4">
+        <p className="text-slate-400 text-sm mt-6">
           Don’t have an account?{" "}
-          <Link to="/signup" className="text-blue-400 hover:underline">
+          <Link to="/signup" className="text-sky-300 hover:text-sky-200">
             Sign up
           </Link>
         </p>

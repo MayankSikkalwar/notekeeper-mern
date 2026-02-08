@@ -1,33 +1,50 @@
-import React, { useContext, useState } from 'react'
-import { NoteContext } from '../context/NoteContext'
+import React, { useContext, useMemo, useState } from "react";
+import { Pin } from "lucide-react";
+import { NoteContext } from "../context/NoteContext";
 
 function Notecard({ note }) {
-  const { deleteNote, updateNote, pinNote } = useContext(NoteContext)
+  const { deleteNote, updateNote, pinNote, pendingNoteIds } =
+    useContext(NoteContext);
 
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditing, setIsEditing] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [editData, setEditData] = useState({
     title: note.title,
-    content: note.content
-  })
+    content: note.content,
+  });
 
   // 🏷️ tags state for edit mode
   const [editTags, setEditTags] = useState(
     note.tags ? note.tags.join(" ") : ""
-  )
+  );
+
+  const isPending = useMemo(
+    () => pendingNoteIds?.has(note._id),
+    [pendingNoteIds, note._id],
+  );
+
+  const shouldClamp = note.content.length > 240;
 
   const handleUpdate = () => {
     updateNote(note._id, {
       ...editData,
       tags: editTags
         .split(" ")
-        .map(tag => tag.trim())
-        .filter(tag => tag !== "")
-    })
-    setIsEditing(false)
-  }
+        .map((tag) => tag.trim())
+        .filter((tag) => tag !== ""),
+    });
+    setIsEditing(false);
+  };
 
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-md hover:shadow-lg transition-all p-5 flex flex-col">
+    <div className="glass-card relative flex flex-col rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+      <div className="absolute right-4 top-4">
+        <Pin
+          className={`h-4 w-4 ${
+            note.isPinned ? "text-amber-300" : "text-slate-600"
+          }`}
+        />
+      </div>
 
       {isEditing ? (
         <>
@@ -36,10 +53,7 @@ function Notecard({ note }) {
           {/* Title */}
           <input
             type="text"
-            className="border rounded-lg p-2 w-full mb-3
-                       focus:ring-2 focus:ring-blue-500 outline-none
-                       bg-white dark:bg-gray-700
-                       text-gray-900 dark:text-white"
+            className="input-field mb-3"
             value={editData.title}
             onChange={(e) =>
               setEditData({ ...editData, title: e.target.value })
@@ -48,10 +62,7 @@ function Notecard({ note }) {
 
           {/* Content */}
           <textarea
-            className="border rounded-lg p-2 w-full mb-3
-                       focus:ring-2 focus:ring-blue-500 outline-none
-                       bg-white dark:bg-gray-700
-                       text-gray-900 dark:text-white"
+            className="input-field mb-3 min-h-[140px] resize-none"
             rows="3"
             value={editData.content}
             onChange={(e) =>
@@ -63,9 +74,7 @@ function Notecard({ note }) {
           <input
             type="text"
             placeholder="Tags (e.g. dsa react project)"
-            className="border rounded-lg p-2 w-full mb-3
-                       bg-white dark:bg-gray-700
-                       text-gray-900 dark:text-white"
+            className="input-field mb-4"
             value={editTags}
             onChange={(e) => setEditTags(e.target.value)}
           />
@@ -74,13 +83,15 @@ function Notecard({ note }) {
           <div className="flex gap-2">
             <button
               onClick={handleUpdate}
-              className="bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded-lg transition"
+              disabled={isPending}
+              className="action-btn bg-emerald-500/20 text-emerald-200 hover:bg-emerald-500/30"
             >
-              Save
+              {isPending ? "Saving..." : "Save"}
             </button>
             <button
               onClick={() => setIsEditing(false)}
-              className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-1.5 rounded-lg transition"
+              disabled={isPending}
+              className="action-btn"
             >
               Cancel
             </button>
@@ -91,14 +102,27 @@ function Notecard({ note }) {
           {/* VIEW MODE */}
 
           {/* Title */}
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          <h2 className="font-display text-lg font-semibold text-slate-100">
             {note.title}
           </h2>
 
           {/* Content */}
-          <p className="text-gray-600 dark:text-gray-300 mt-2 flex-1">
+          <p
+            className={`mt-2 text-sm leading-relaxed text-slate-300 ${
+              !isExpanded && shouldClamp ? "note-clamp" : ""
+            }`}
+          >
             {note.content}
           </p>
+          {shouldClamp && (
+            <button
+              type="button"
+              className="mt-2 text-xs font-semibold text-sky-300 hover:text-sky-200"
+              onClick={() => setIsExpanded((prev) => !prev)}
+            >
+              {isExpanded ? "Show less" : "Read more"}
+            </button>
+          )}
 
           {/* 🏷️ Tags Display */}
           {note.tags && note.tags.length > 0 && (
@@ -106,9 +130,7 @@ function Notecard({ note }) {
               {note.tags.map((tag, index) => (
                 <span
                   key={index}
-                  className="bg-blue-100 dark:bg-blue-600
-                             text-blue-800 dark:text-white
-                             px-2 py-0.5 rounded-full text-xs"
+                  className="pill"
                 >
                   #{tag}
                 </span>
@@ -117,8 +139,8 @@ function Notecard({ note }) {
           )}
 
           {/* Footer */}
-          <div className="mt-4 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-            <span>
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
+            <span className="uppercase tracking-wide">
               {new Date(note.createdAt).toLocaleDateString("en-GB", {
                 day: "numeric",
                 month: "short",
@@ -126,19 +148,21 @@ function Notecard({ note }) {
               })}
             </span>
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {/* 📌 Pin */}
               <button
                 onClick={() => pinNote(note._id)}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg transition"
+                disabled={isPending}
+                className="action-btn"
               >
-                {note.isPinned ? "Unpin 📌" : "Pin 📌"}
+                {note.isPinned ? "Unpin" : "Pin"}
               </button>
 
               {/* Edit */}
               <button
                 onClick={() => setIsEditing(true)}
-                className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-lg transition"
+                disabled={isPending}
+                className="action-btn"
               >
                 Edit
               </button>
@@ -146,7 +170,8 @@ function Notecard({ note }) {
               {/* Delete */}
               <button
                 onClick={() => deleteNote(note._id)}
-                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition"
+                disabled={isPending}
+                className="action-btn text-rose-200 hover:text-white"
               >
                 Delete
               </button>
@@ -155,7 +180,7 @@ function Notecard({ note }) {
         </>
       )}
     </div>
-  )
+  );
 }
 
-export default Notecard
+export default Notecard;

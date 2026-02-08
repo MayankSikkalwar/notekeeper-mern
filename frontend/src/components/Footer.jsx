@@ -1,9 +1,11 @@
 
 function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-400 py-4 border-t border-gray-800">
-      <div className="text-center text-sm">
-        © {new Date().getFullYear()} <span className="text-blue-400 font-semibold">NoteKeeper</span>. All rights reserved.
+    <footer className="border-t border-white/5 bg-slate-950/80 py-6">
+      <div className="text-center text-xs text-slate-500">
+        © {new Date().getFullYear()}{" "}
+        <span className="font-display text-slate-300">NoteKeeper</span>. All
+        rights reserved.
       </div>
     </footer>
   );
