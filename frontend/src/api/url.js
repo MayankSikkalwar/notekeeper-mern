@@ -1,8 +1,8 @@
 import axios from "axios"
 
 const BACKEND_URL = axios.create({
-    baseURL: import.meta.env.VITE_BACKEND_URL
+    baseURL: "https://notekeeper-mern.onrender.com/api/v1/noteapp",
 
-})
+});
 
-export default BACKEND_URL
+export default BACKEND_URL;
